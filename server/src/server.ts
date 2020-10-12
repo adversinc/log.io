@@ -96,7 +96,7 @@ async function broadcastMessage(
       await messageHandler(config, inputs, io, msgParts)
     } else {
       // eslint-disable-next-line no-console
-      console.error(`Unknown message type: ${msgParts[0]}`)
+      console.error(`Unknown message type: "${msgParts[0]}"\n${msg}\n===`)
     }
   })
 }
