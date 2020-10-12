@@ -68,6 +68,7 @@ Sample configuration file:
       "stream": "system-logs",
       "config": {
         "path": "/var/log/**/*.log",
+        "autoClose": false,
         "watcherOptions": {
           "ignored": "*.txt",
           "depth": 99,
@@ -78,6 +79,8 @@ Sample configuration file:
 }
 
 ```
+
+* autoClose (boolean) - close log file after each read operation
 
 ## Server TCP interface
 
