@@ -26,8 +26,11 @@ export const MessageReducer = (
       Object.keys(screenBindings).forEach((screenId) => {
         if (screenBindings[screenId]) {
           const [stream, source] = inputName.split('|')
-          const message = `[${stream}] [${source}] - ${msg}`
-          let updatedMessages = (screens[screenId] || []).concat([message])
+
+					//const message = `[${stream}] [${source}] - ${msg}`
+          const message = msg
+
+					let updatedMessages = (screens[screenId] || []).concat([message])
           // Avoid slicing the array on every single update, slice() is expensive.
           // Allow array to grow beyond the limit by a percentage, then slice.
           if (updatedMessages.length > MAX_MESSAGES + Math.floor(MAX_MESSAGES * 0.02)) {
