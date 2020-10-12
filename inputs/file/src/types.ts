@@ -25,6 +25,7 @@ export type FileInputConfig = {
   stream: string,
   config: {
     path: string,
+		autoClose?: boolean,
     watcherOptions: WatcherOptions,
   },
 }

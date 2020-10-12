@@ -10,6 +10,7 @@ import {
 } from './types'
 
 const openAsync = promisify(fs.open)
+const closeAsync = promisify(fs.close)
 const readAsync = promisify(fs.read)
 const statAsync = promisify(fs.stat)
 
@@ -25,6 +26,7 @@ async function sendNewMessages(
   filePath: string,
   newSize: number,
   oldSize: number,
+	autoClose: boolean = false
 ): Promise<void> {
   let fd = fds[filePath]
   if (!fd) {
@@ -34,6 +36,12 @@ async function sendNewMessages(
   const offset = Math.max(newSize - oldSize, 0)
   const readBuffer = Buffer.alloc(offset)
   await readAsync(fd, readBuffer, 0, offset, oldSize)
+
+	if(autoClose) {
+		await closeAsync(fd)
+		delete fds[filePath]
+	}
+
   const messages = readBuffer.toString().split('\r\n').filter((msg) => !!msg.trim())
   messages.forEach((message) => {
     client.write(`+msg|${streamName}|${sourceName}|${message}\0`)
@@ -58,10 +66,10 @@ async function startFileWatcher(
   streamName: string,
   sourceName: string,
   inputPath: string,
-  watcherOptions: WatcherOptions,
+  inputConfig: FileInputConfig,
 ): Promise<void> {
   const fileSizes: FileSizeMap = {}
-  const watcher = chokidar.watch(inputPath, watcherOptions)
+  const watcher = chokidar.watch(inputPath, inputConfig.config.watcherOptions)
   // Capture byte size of a new file
   watcher.on('add', async (filePath: string) => {
     // eslint-disable-next-line no-console
@@ -79,6 +87,7 @@ async function startFileWatcher(
         filePath,
         newSize,
         fileSizes[filePath],
+				inputConfig.config.autoClose
       )
       fileSizes[filePath] = newSize
     } catch (err) {
@@ -135,7 +144,7 @@ async function main(config: InputConfig): Promise<void> {
       input.stream,
       input.source,
       input.config.path,
-      input.config.watcherOptions || {},
+      input,
     )
   )))
 }
